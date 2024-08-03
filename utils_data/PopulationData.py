@@ -25,7 +25,9 @@ class PopulationData:
         return self
 
     def encode_population_int(self) -> Self:
-        self.data['Population'] = self.data['Population'].apply(lambda x: int(x.replace('A', '')))
+        unique_populations = self.data['Population'].unique()
+        population_dict = {population: i for i, population in enumerate(unique_populations)}
+        self.data['Population'] = self.data['Population'].map(population_dict)
         return self
 
     def encode_degrees(self) -> Self:
