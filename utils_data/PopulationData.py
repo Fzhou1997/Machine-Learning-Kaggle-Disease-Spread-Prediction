@@ -5,8 +5,7 @@ from typing import Self, Literal
 import numpy as np
 import torch
 from sklearn.model_selection import train_test_split
-from torch.utils.data import DataLoader
-from torch_geometric.data import Data
+from torch_geometric.data import Data, DataLoader
 
 import pandas as pd
 
@@ -22,6 +21,13 @@ class PopulationData:
 
     def encode_connection_lists(self) -> Self:
         self.data['Connections'] = self.data['Connections'].apply(ast.literal_eval)
+        return self
+
+    def encode_connection_int(self) -> Self:
+        all_nodes = set(self.data['ID']).union(*self.data['Connections'])
+        node_mapping = {node: idx for idx, node in enumerate(all_nodes)}
+        self.data['ID'] = self.data['ID'].map(node_mapping)
+        self.data['Connections'] = self.data['Connections'].apply(lambda conn_list: [node_mapping[conn] for conn in conn_list])
         return self
 
     def encode_population_int(self) -> Self:
@@ -119,7 +125,7 @@ class PopulationData:
                 edges.append((row['ID'], connection))
         edges = torch.tensor(edges, dtype=torch.long).t().contiguous()
 
-        x = torch.tensor(data[['Age', 'Constitution', 'Behaviour']].values, dtype=torch.float)
+        x = torch.tensor(data[['Age', 'Constitution', 'Behaviour', 'Population']].values, dtype=torch.float)
         y = torch.tensor(data['Infected'].values, dtype=torch.long)
 
         train_mask = torch.tensor(data['Train'].values, dtype=torch.bool)
@@ -132,9 +138,14 @@ class PopulationData:
         return graph_data
 
     def get_dataloaders(self,
-                        batch_size: int,
+                        batch_size: int = 32,
                         population: int = None) -> tuple[DataLoader, DataLoader]:
-        pass
+        graph_data = self.get_graph(population)
+        
+        train_loader = DataLoader([graph_data], batch_size=batch_size, shuffle=True)
+        test_loader = DataLoader([graph_data], batch_size=batch_size, shuffle=False)
+        
+        return train_loader, test_loader
 
 if __name__ == '__main__':
     data = PopulationData().load("../data/raw/train.csv")
