@@ -12,84 +12,87 @@ import pandas as pd
 
 class PopulationData:
     def __init__(self):
-        self.data = None
+        self.data_df = None
         self.graph = None
 
     def load(self, path: str | bytes | os.PathLike[str] | os.PathLike[bytes]) -> Self:
-        self.data = pd.read_csv(path, index_col=0)
+        self.data_df = pd.read_csv(path, index_col=0)
         return self
 
     def encode_connection_lists(self) -> Self:
-        self.data['Connections'] = self.data['Connections'].apply(ast.literal_eval)
+        self.data_df['Connections'] = self.data_df['Connections'].apply(ast.literal_eval)
         return self
 
     def encode_connection_int(self) -> Self:
-        all_nodes = set(self.data['ID']).union(*self.data['Connections'])
+        all_nodes = set(self.data_df['ID']).union(*self.data_df['Connections'])
         node_mapping = {node: idx for idx, node in enumerate(all_nodes)}
-        self.data['ID'] = self.data['ID'].map(node_mapping)
-        self.data['Connections'] = self.data['Connections'].apply(lambda conn_list: [node_mapping[conn] for conn in conn_list])
+        self.data_df['ID'] = self.data_df['ID'].map(node_mapping)
+        self.data_df['Connections'] = self.data_df['Connections'].apply(lambda conn_list: [node_mapping[conn] for conn in conn_list])
         return self
 
     def encode_population_int(self) -> Self:
-        unique_populations = self.data['Population'].unique()
+        unique_populations = self.data_df['Population'].unique()
         population_dict = {population: i for i, population in enumerate(unique_populations)}
-        self.data['Population'] = self.data['Population'].map(population_dict)
+        self.data_df['Population'] = self.data_df['Population'].map(population_dict)
         return self
 
-    def encode_degrees(self) -> Self:
-        self.data['Degrees'] = self.data['Connections'].apply(len)
+    def encode_degrees_centrality(self) -> Self:
+        self.data_df['Degrees'] = self.data_df['Connections'].apply(len)
         return self
+
+    def encode_clustering_coefficient(self) -> Self:
+        pass # TODO: Implement this method
 
     def encode_mean_neighbor_age(self) -> Self:
-        id_to_age = dict(zip(self.data['ID'], self.data['Age']))
-        self.data['Mean_Neighbor_Age'] = self.data['Connections'].apply(
+        id_to_age = dict(zip(self.data_df['ID'], self.data_df['Age']))
+        self.data_df['Mean_Neighbor_Age'] = self.data_df['Connections'].apply(
             lambda connections: np.mean([id_to_age[connection] for connection in connections]))
         return self
 
     def encode_mean_neighbor_constitution(self) -> Self:
-        id_to_constitution = dict(zip(self.data['ID'], self.data['Constitution']))
-        self.data['Mean_Neighbor_Constitution'] = self.data['Connections'].apply(
+        id_to_constitution = dict(zip(self.data_df['ID'], self.data_df['Constitution']))
+        self.data_df['Mean_Neighbor_Constitution'] = self.data_df['Connections'].apply(
             lambda connections: np.mean([id_to_constitution[connection] for connection in connections]))
         return self
 
     def encode_mean_neighbor_behaviour(self) -> Self:
-        id_to_behaviour = dict(zip(self.data['ID'], self.data['Behaviour']))
-        self.data['Mean_Neighbor_Behaviour'] = self.data['Connections'].apply(
+        id_to_behaviour = dict(zip(self.data_df['ID'], self.data_df['Behaviour']))
+        self.data_df['Mean_Neighbor_Behaviour'] = self.data_df['Connections'].apply(
             lambda connections: np.mean([id_to_behaviour[connection] for connection in connections]))
         return self
 
     def encode_test_train(self) -> Self:
-        indices = self.data.index
+        indices = self.data_df.index
         train_idx, test_idx = train_test_split(indices, test_size=0.2)
-        self.data['Train'] = self.data.index.isin(train_idx)
-        self.data['Test'] = self.data.index.isin(test_idx)
+        self.data_df['Train'] = self.data_df.index.isin(train_idx)
+        self.data_df['Test'] = self.data_df.index.isin(test_idx)
         return self
 
     def drop_population(self) -> Self:
-        self.data.drop(columns=['Population'], inplace=True)
+        self.data_df.drop(columns=['Population'], inplace=True)
         return self
 
     def drop_index_patient(self) -> Self:
-        self.data.drop(columns=['Index_Patient'], inplace=True)
+        self.data_df.drop(columns=['Index_Patient'], inplace=True)
         return self
 
     def drop_connections(self) -> Self:
-        self.data.drop(columns=['Connections'], inplace=True)
+        self.data_df.drop(columns=['Connections'], inplace=True)
         return self
 
     def drop_degrees(self):
-        self.data.drop(columns=['Degrees'], inplace=True)
+        self.data_df.drop(columns=['Degrees'], inplace=True)
         return self
 
     def drop_id(self):
-        self.data.drop(columns=['ID'], inplace=True)
+        self.data_df.drop(columns=['ID'], inplace=True)
         return self
 
     def get_data(self,
                  train: Literal['train'] | Literal['test'] | Literal['both'] = 'both',
                  x: Literal['x'] | Literal['y'] | Literal['both'] = 'both',
                  population: int = None) -> pd.DataFrame:
-        out = self.data.copy(deep=True)
+        out = self.data_df.copy(deep=True)
         if train == 'train':
             out = out[out["Train"]]
             out = out.drop(columns=["Train", "Test"])
@@ -115,9 +118,9 @@ class PopulationData:
     def get_graph(self,
                   population: int = None) -> Data:
         if population is not None:
-            data = self.data[self.data['Population'] == population].copy(deep=True)
+            data = self.data_df[self.data_df['Population'] == population].copy(deep=True)
         else:
-            data = self.data.copy(deep=True)
+            data = self.data_df.copy(deep=True)
 
         edges = []
         for idx, row in data.iterrows():
@@ -149,7 +152,7 @@ class PopulationData:
 
 if __name__ == '__main__':
     data = PopulationData().load("../data/raw/train.csv")
-    data.encode_connection_lists().encode_degrees()
+    data.encode_connection_lists().encode_degrees_centrality()
     data.drop_population().drop_index_patient().drop_connections().drop_id()
     data.encode_test_train()
     train_x = data.get_numpy(train='train', x='x')
