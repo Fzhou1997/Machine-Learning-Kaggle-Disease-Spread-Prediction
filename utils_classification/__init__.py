@@ -1,1 +1,2 @@
 from utils_classification.GaussianDiscriminantAnalysisRadialBasisFunction import GaussianDiscriminantAnalysisRadialBasisFunction
+from utils_classification.GraphConvolutionalNetwork import GraphConvolutionalNetwork

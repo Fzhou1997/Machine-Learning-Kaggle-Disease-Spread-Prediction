@@ -9,6 +9,7 @@ from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 from torch import Tensor
 from torch_geometric.data import Data
+from torch_geometric.data import Data, DataLoader
 
 import pandas as pd
 from torch_geometric.utils import from_networkx
