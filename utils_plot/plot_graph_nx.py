@@ -2,12 +2,12 @@ import networkx as nx
 import matplotlib.pyplot as plt
 
 
-def plot_graph(graph: nx.Graph,
-               node_attribute: str,
-               color_dict: dict,
-               figsize: tuple[float, float] = (12, 8),
-               title: str = None,
-               random_state: int = 42):
+def plot_graph_nx(graph: nx.Graph,
+                  node_attribute: str,
+                  color_dict: dict,
+                  figsize: tuple[float, float] = (12, 8),
+                  title: str = None,
+                  random_state: int = 42):
     plt.figure(figsize=figsize)
     pos = nx.spring_layout(graph, seed=random_state)
     node_values = [graph.nodes[node][node_attribute] for node in graph.nodes]

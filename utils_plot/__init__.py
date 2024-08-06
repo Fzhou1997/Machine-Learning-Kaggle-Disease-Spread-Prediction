@@ -1,1 +1,1 @@
-from utils_plot.plot_graph import plot_graph
+from utils_plot.plot_graph_nx import plot_graph_nx
