@@ -361,7 +361,7 @@ class PopulationData:
 
     def get_data_dataframes(self,
                             features: list[str] = None,
-                            train: Literal['train', 'test'] = None,
+                            train: Literal['Train', 'Test'] = None,
                             population: str = None) -> tuple[pd.DataFrame, pd.DataFrame]:
         out = self.data_df
         if population is not None:
@@ -372,20 +372,20 @@ class PopulationData:
         out_features = out.drop(columns=["Infected"])
         out_labels = out[["Infected"]]
         if features is not None:
-            out_columns = set(out_features.columns.to_list()) & set(features)
+            out_columns = [feature for feature in features if feature in out_features.columns]
             out_features = out_features[out_columns]
         return out_features, out_labels
 
     def get_data_numpy(self,
                        features: list[str] = None,
-                       train: Literal['train', 'test'] = None,
+                       train: Literal['Train', 'Test'] = None,
                        population: str = None) -> tuple[np.ndarray, np.ndarray]:
         features_df, labels_df = self.get_data_dataframes(features=features, train=train, population=population)
         return features_df.to_numpy(), labels_df.to_numpy()
 
     def get_data_tensors(self,
                          features: list[str] = None,
-                         train: Literal['train', 'test'] = None,
+                         train: Literal['Train', 'Test'] = None,
                          population: int = None) -> tuple[Tensor, Tensor]:
         features_df, labels_df = self.get_data_numpy(features=features, train=train, population=population)
         return torch.tensor(features_df, dtype=torch.float32), torch.tensor(labels_df, dtype=torch.float32)
@@ -396,8 +396,7 @@ class PopulationData:
         out = self.graph_nx.copy()
         if population is not None:
             out.remove_nodes_from([node for node in out.nodes if self.data_df.loc[node, "Population"] != population])
-        out_features = set(self.data_df.columns.to_list()) & set(features)
-        out_features = out_features - {"Population", "Connections", "Train"}
+        out_features = [feature for feature in features if (feature in self.data_df.columns and feature not in ["Population", "Connections", "Train"])]
         for feature in out_features:
             nx.set_node_attributes(out, self.data_df[feature].to_dict(), name=feature)
         return out
