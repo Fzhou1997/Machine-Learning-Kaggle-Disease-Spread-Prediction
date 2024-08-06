@@ -1,1 +1,3 @@
 from utils_plot.plot_graph_nx import plot_graph_nx
+from utils_plot.plot_confusion_matrix import plot_confusion_matrix
+from utils_plot.plot_roc import plot_roc
