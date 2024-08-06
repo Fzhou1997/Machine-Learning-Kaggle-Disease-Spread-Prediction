@@ -3,145 +3,252 @@ import os
 from typing import Self, Literal
 
 import numpy as np
+import networkx as nx
 import torch
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
-from torch.utils.data import DataLoader
+from torch import Tensor
 from torch_geometric.data import Data
 
 import pandas as pd
+from torch_geometric.utils import from_networkx
 
 
 class PopulationData:
     def __init__(self):
-        self.data = None
-        self.graph = None
+        self.data_df = None
+        self.graph_nx = None
 
-    def load(self, path: str | bytes | os.PathLike[str] | os.PathLike[bytes]) -> Self:
-        self.data = pd.read_csv(path, index_col=0)
+    def load_raw(self, path: str | bytes | os.PathLike[str] | os.PathLike[bytes]) -> Self:
+        self.data_df = pd.read_csv(path, index_col='ID')
+        self.data_df.drop(columns=['id'], inplace=True)
+        return self
+
+    def load_processed(self, path: str | bytes | os.PathLike[str] | os.PathLike[bytes]) -> Self:
+        self.data_df = pd.read_csv(path, index_col='ID')
+        return self
+
+    def save_processed(self, path: str | bytes | os.PathLike[str] | os.PathLike[bytes]) -> None:
+        self.data_df.to_csv(path)
+
+    def encode_normalized_age(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Age'] = scaler.fit_transform(self.data_df[['Age']])
+        return self
+
+    def encode_normalized_behavior(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Behavior'] = scaler.fit_transform(self.data_df[['Behaviour']])
+        return self
+
+    def encode_normalized_constitution(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Constitution'] = scaler.fit_transform(self.data_df[['Constitution']])
+        return self
+
+    def encode_standardized_age(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Age'] = scaler.fit_transform(self.data_df[['Age']])
+        return self
+
+    def encode_standardized_constitution(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Constitution'] = scaler.fit_transform(self.data_df[['Constitution']])
+        return self
+
+    def encode_standardized_behavior(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Behavior'] = scaler.fit_transform(self.data_df[['Behaviour']])
         return self
 
     def encode_connection_lists(self) -> Self:
-        self.data['Connections'] = self.data['Connections'].apply(ast.literal_eval)
+        self.data_df['Connections'] = self.data_df['Connections'].apply(ast.literal_eval)
         return self
 
-    def encode_population_int(self) -> Self:
-        unique_populations = self.data['Population'].unique()
-        population_dict = {population: i for i, population in enumerate(unique_populations)}
-        self.data['Population'] = self.data['Population'].map(population_dict)
+    def encode_graph_nx(self) -> Self:
+        self.graph_nx = nx.Graph()
+        for idx, row in self.data_df.iterrows():
+            self.graph_nx.add_node(idx)
+            for connection in row['Connections']:
+                self.graph_nx.add_edge(idx, connection)
         return self
 
     def encode_degrees(self) -> Self:
-        self.data['Degrees'] = self.data['Connections'].apply(len)
+        degrees_dict = dict(self.graph_nx.degree())
+        degrees_series = pd.Series(degrees_dict)
+        self.data_df['Degrees'] = degrees_series
+        return
+
+    def encode_degree_centrality(self) -> Self:
+        degree_centrality_dict = nx.degree_centrality(self.graph_nx)
+        degree_centrality_series = pd.Series(degree_centrality_dict)
+        self.data_df['Degree_Centrality'] = degree_centrality_series
+        return self
+
+    def encode_clustering_coefficient(self) -> Self:
+        clustering_coefficient_dict = nx.clustering(self.graph_nx)
+        clustering_coefficient_series = pd.Series(clustering_coefficient_dict)
+        self.data_df['Clustering_Coefficient'] = clustering_coefficient_series
+        return self
+
+    def encode_connected_index_patient(self) -> Self:
+        index_patients = self.data_df[self.data_df['Index_Patient'] == 1]
+        index_patients_dict = dict(zip(index_patients['Population'], index_patients.index))
+        self.data_df['Connected_Index_Patient'] = self.data_df.apply(
+            lambda row: index_patients_dict[row['Population']], axis=1
+        )
+        return self
+
+    def encode_distance_to_index_patient(self) -> Self:
+        index_patients = self.data_df[self.data_df['Index_Patient'] == 1].index.to_list()
+        shortest_paths_all = nx.multi_source_dijkstra_path_length(self.graph_nx, index_patients)
+        shortest_paths = {node: float('inf') for node in self.data_df.index}
+        for node, length in shortest_paths_all.items():
+            shortest_paths[node] = length
+        self.data_df['Distance_to_Index_Patient'] = pd.Series(shortest_paths)
+        return self
+
+    def encode_sum_neighbor_age(self) -> Self:
+        ages = self.data_df['Age'].to_dict()
+        self.data_df['Sum_Neighbor_Age'] = self.data_df['Connections'].apply(
+            lambda connections: np.sum([ages[connection] for connection in connections])
+        )
+        return self
+
+    def encode_sum_neighbor_constitution(self) -> Self:
+        constitutions = self.data_df['Constitution'].to_dict()
+        self.data_df['Sum_Neighbor_Constitution'] = self.data_df['Connections'].apply(
+            lambda connections: np.sum([constitutions[connection] for connection in connections])
+        )
+        return self
+
+    def encode_sum_neighbor_behaviour(self) -> Self:
+        behaviors = self.data_df['Behaviour'].to_dict()
+        self.data_df['Sum_Neighbor_Behaviour'] = self.data_df['Connections'].apply(
+            lambda connections: np.sum([behaviors[connection] for connection in connections])
+        )
+        return self
+
+    def encode_sum_neighbor_degree(self) -> Self:
+        degrees = self.data_df['Degrees'].to_dict()
+        self.data_df['Sum_Neighbor_Degree'] = self.data_df['Connections'].apply(
+            lambda connections: np.sum([degrees[connection] for connection in connections])
+        )
+        return self
+
+    def encode_sum_neighbor_degree_centrality(self) -> Self:
+        degree_centrality = self.data_df['Degree_Centrality'].to_dict()
+        self.data_df['Sum_Neighbor_Degree_Centrality'] = self.data_df['Connections'].apply(
+            lambda connections: np.sum([degree_centrality[connection] for connection in connections])
+        )
         return self
 
     def encode_mean_neighbor_age(self) -> Self:
-        id_to_age = dict(zip(self.data['ID'], self.data['Age']))
-        self.data['Mean_Neighbor_Age'] = self.data['Connections'].apply(
-            lambda connections: np.mean([id_to_age[connection] for connection in connections]))
+        ages = self.data_df['Age'].to_dict()
+        self.data_df['Mean_Neighbor_Age'] = self.data_df['Connections'].apply(
+            lambda connections: np.mean([ages[connection] for connection in connections])
+        )
         return self
 
     def encode_mean_neighbor_constitution(self) -> Self:
-        id_to_constitution = dict(zip(self.data['ID'], self.data['Constitution']))
-        self.data['Mean_Neighbor_Constitution'] = self.data['Connections'].apply(
-            lambda connections: np.mean([id_to_constitution[connection] for connection in connections]))
+        constitutions = self.data_df['Constitution'].to_dict()
+        self.data_df['Mean_Neighbor_Constitution'] = self.data_df['Connections'].apply(
+            lambda connections: np.mean([constitutions[connection] for connection in connections])
+        )
         return self
 
     def encode_mean_neighbor_behaviour(self) -> Self:
-        id_to_behaviour = dict(zip(self.data['ID'], self.data['Behaviour']))
-        self.data['Mean_Neighbor_Behaviour'] = self.data['Connections'].apply(
-            lambda connections: np.mean([id_to_behaviour[connection] for connection in connections]))
+        behaviors = self.data_df['Behaviour'].to_dict()
+        self.data_df['Mean_Neighbor_Behaviour'] = self.data_df['Connections'].apply(
+            lambda connections: np.mean([behaviors[connection] for connection in connections])
+        )
+        return self
+
+    def encode_mean_neighbor_degree(self) -> Self:
+        degrees = self.data_df['Degrees'].to_dict()
+        self.data_df['Mean_Neighbor_Degree'] = self.data_df['Connections'].apply(
+            lambda connections: np.mean([degrees[connection] for connection in connections])
+        )
+        return self
+
+    def encode_mean_neighbor_degree_centrality(self) -> Self:
+        degree_centrality = self.data_df['Degree_Centrality'].to_dict()
+        self.data_df['Mean_Neighbor_Degree_Centrality'] = self.data_df['Connections'].apply(
+            lambda connections: np.mean([degree_centrality[connection] for connection in connections])
+        )
+        return self
+
+    def encode_mean_neighbor_clustering_coefficient(self) -> Self:
+        clustering_coefficient = self.data_df['Clustering_Coefficient'].to_dict()
+        self.data_df['Mean_Neighbor_Clustering_Coefficient'] = self.data_df['Connections'].apply(
+            lambda connections: np.mean([clustering_coefficient[connection] for connection in connections])
+        )
         return self
 
     def encode_test_train(self) -> Self:
-        indices = self.data.index
+        indices = self.data_df.index
         train_idx, test_idx = train_test_split(indices, test_size=0.2)
-        self.data['Train'] = self.data.index.isin(train_idx)
-        self.data['Test'] = self.data.index.isin(test_idx)
+        self.data_df['Train'] = self.data_df.index.isin(train_idx)
         return self
 
-    def drop_population(self) -> Self:
-        self.data.drop(columns=['Population'], inplace=True)
-        return self
-
-    def drop_index_patient(self) -> Self:
-        self.data.drop(columns=['Index_Patient'], inplace=True)
-        return self
-
-    def drop_connections(self) -> Self:
-        self.data.drop(columns=['Connections'], inplace=True)
-        return self
-
-    def drop_degrees(self):
-        self.data.drop(columns=['Degrees'], inplace=True)
-        return self
-
-    def drop_id(self):
-        self.data.drop(columns=['ID'], inplace=True)
-        return self
-
-    def get_data(self,
-                 train: Literal['train'] | Literal['test'] | Literal['both'] = 'both',
-                 x: Literal['x'] | Literal['y'] | Literal['both'] = 'both',
-                 population: int = None) -> pd.DataFrame:
-        out = self.data.copy(deep=True)
-        if train == 'train':
-            out = out[out["Train"]]
-            out = out.drop(columns=["Train", "Test"])
-        elif train == 'test':
-            out = out[out["Test"]]
-            out = out.drop(columns=["Train", "Test"])
-        if x == 'x':
-            out = out.drop(columns=["Infected"])
-        elif x == 'y':
-            out = out["Infected"]
+    def get_data_dataframes(self,
+                            features: list[str] = None,
+                            train: Literal['train', 'test'] = None,
+                            population: str = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+        out = self.data_df
         if population is not None:
             out = out[out["Population"] == population]
-            out = out.drop(columns=["Population"])
+        if train is not None:
+            out = out[out[train]]
+        out = out.drop(columns=["Population", "Connections", "Train"])
+        out_features = out.drop(columns=["Infected"])
+        out_labels = out["Infected"]
+        if features is not None:
+            out_columns = set(out_features.columns.to_list()) & set(features)
+            out_features = out_features[out_columns]
+        return out_features, out_labels
+
+    def get_data_numpy(self,
+                       features: list[str] = None,
+                       train: Literal['train', 'test'] = None,
+                       population: str = None) -> tuple[np.ndarray, np.ndarray]:
+        features_df, labels_df = self.get_data_dataframes(features=features, train=train, population=population)
+        return features_df.to_numpy(), labels_df.to_numpy()
+
+    def get_data_tensors(self,
+                         features: list[str] = None,
+                         train: Literal['train', 'test'] = None,
+                         population: int = None) -> tuple[Tensor, Tensor]:
+        features_df, labels_df = self.get_data_numpy(features=features, train=train, population=population)
+        return torch.tensor(features_df, dtype=torch.float32), torch.tensor(labels_df, dtype=torch.float32)
+
+    def get_graph_nx(self,
+                     features: list[str] = None,
+                     population: int = None) -> nx.Graph:
+        out = self.graph_nx.copy()
+        if population is not None:
+            out.remove_nodes_from([node for node in out.nodes if self.data_df.loc[node, "Population"] != population])
+        out_features = set(self.data_df.columns.to_list()) & set(features)
+        out_features = out_features - {"Population", "Connections", "Train"}
+        for feature in out_features:
+            nx.set_node_attributes(out, self.data_df[feature].to_dict(), name=feature)
         return out
 
-    def get_numpy(self,
-                  train: Literal['train'] | Literal['test'] | Literal['both'] = 'both',
-                  x: Literal['x'] | Literal['y'] | Literal['both'] = 'both',
-                  population: int = None) -> np.ndarray:
-        out = self.get_data(train=train, x=x, population=population)
-        return out.to_numpy()
+    def get_graph_torch(self,
+                        features: list[str] = None,
+                        population: int = None) -> Data:
+        graph_nx = self.get_graph_nx(features=features, population=population)
+        graph_torch = from_networkx(graph_nx)
+        return graph_torch
 
-    def get_graph(self,
-                  population: int = None) -> Data:
-        if population is not None:
-            data = self.data[self.data['Population'] == population].copy(deep=True)
-        else:
-            data = self.data.copy(deep=True)
-
-        edges = []
-        for idx, row in data.iterrows():
-            for connection in row['Connections']:
-                edges.append((row['ID'], connection))
-        edges = torch.tensor(edges, dtype=torch.long).t().contiguous()
-
-        x = torch.tensor(data[['Age', 'Constitution', 'Behaviour']].values, dtype=torch.float)
-        y = torch.tensor(data['Infected'].values, dtype=torch.long)
-
-        train_mask = torch.tensor(data['Train'].values, dtype=torch.bool)
-        test_mask = torch.tensor(data['Test'].values, dtype=torch.bool)
-
-        graph_data = Data(x=x, edge_index=edges, y=y)
-        graph_data.train_mask = train_mask
-        graph_data.test_mask = test_mask
-
-        return graph_data
-
-    def get_dataloaders(self,
-                        batch_size: int,
-                        population: int = None) -> tuple[DataLoader, DataLoader]:
-        pass
 
 if __name__ == '__main__':
-    data = PopulationData().load("../data/raw/train.csv")
-    data.encode_connection_lists().encode_degrees()
-    data.drop_population().drop_index_patient().drop_connections().drop_id()
+    data = PopulationData().load_raw("../data/raw/train.csv")
+    data.encode_connection_lists()
+    data.encode_graph_nx()
+    data.encode_degrees()
+    data.encode_degree_centrality()
+    data.encode_clustering_coefficient()
+    data.encode_connected_index_patient()
+    data.encode_distance_to_index_patient()
     data.encode_test_train()
-    train_x = data.get_numpy(train='train', x='x')
-    train_y = data.get_numpy(train='train', x='y')
-    test_x = data.get_numpy(train='test', x='x')
-    test_y = data.get_numpy(train='test', x='y')
