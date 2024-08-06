@@ -357,6 +357,7 @@ class PopulationData:
         indices = self.data_df.index
         train_idx, test_idx = train_test_split(indices, test_size=0.2)
         self.data_df['Train'] = self.data_df.index.isin(train_idx)
+        self.data_df['Test'] = self.data_df.index.isin(test_idx)
         return self
 
     def get_data_dataframes(self,
@@ -368,7 +369,7 @@ class PopulationData:
             out = out[out["Population"] == population]
         if train is not None:
             out = out[out[train]]
-        out = out.drop(columns=["Population", "Connections", "Train"])
+        out = out.drop(columns=["Population", "Connections", "Train", "Test"])
         out_features = out.drop(columns=["Infected"])
         out_labels = out[["Infected"]]
         if features is not None:
@@ -396,7 +397,7 @@ class PopulationData:
         out = self.graph_nx.copy()
         if population is not None:
             out.remove_nodes_from([node for node in out.nodes if self.data_df.loc[node, "Population"] != population])
-        out_features = [feature for feature in features if (feature in self.data_df.columns and feature not in ["Population", "Connections", "Train"])]
+        out_features = [feature for feature in features if (feature in self.data_df.columns and feature not in ["Population", "Connections", "Train", "Test"])]
         for feature in out_features:
             nx.set_node_attributes(out, self.data_df[feature].to_dict(), name=feature)
         return out
