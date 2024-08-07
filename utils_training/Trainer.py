@@ -28,6 +28,7 @@ class Trainer:
             self.optimizer.zero_grad()
             features, label = features.to(self.device), label.to(self.device)
             predicted = self.model(features)
+            predicted = predicted.squeeze()
             loss = self.criterion(predicted, label)
             running_loss += loss.item()
             loss.backward()
@@ -42,6 +43,7 @@ class Trainer:
             for features, label in self.eval_loader:
                 features, label = features.to(self.device), label.to(self.device)
                 predicted = self.model(features)
+                predicted = predicted.squeeze()
                 loss += self.criterion(predicted, label).item()
         loss /= len(self.eval_loader)
         return loss
@@ -49,10 +51,11 @@ class Trainer:
     def train(self,
               train_set: Dataset,
               eval_set: Dataset,
-              num_epochs: int,
+              batch_size: int = 32,
+              num_epochs: int = 100,
               device: Literal['cpu', 'cuda', 'mps'] = 'cpu') -> None:
-        self.train_loader = DataLoader(train_set, batch_size=128, shuffle=True)
-        self.eval_loader = DataLoader(eval_set, batch_size=128, shuffle=False)
+        self.train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
+        self.eval_loader = DataLoader(eval_set, batch_size=batch_size, shuffle=False)
         self.device = device
         self.model.to(self.device)
         self.train_losses = []
@@ -73,14 +76,19 @@ class Trainer:
         self.model.load_state_dict(best_model_state)
 
     def test(self,
-             test_set: Dataset) -> None:
+             test_set: Dataset,
+             batch_size: int = 32,
+             device: Literal['cpu', 'cuda', 'mps'] = 'cpu') -> None:
+        self.device = device
+        self.model.to(self.device)
         self.model.eval()
-        test_loader = DataLoader(test_set, batch_size=128, shuffle=False)
+        test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
         loss = 0
         with torch.no_grad():
             for features, label in test_loader:
                 features, label = features.to(self.device), label.to(self.device)
                 predicted = self.model(features)
+                predicted = predicted.squeeze()
                 loss += self.criterion(predicted, label).item()
         loss /= len(test_loader)
         print(f'Test loss: {loss:.4f}')

@@ -5,6 +5,7 @@ from typing import Self, Literal
 import numpy as np
 import networkx as nx
 import torch
+from node2vec import Node2Vec
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.model_selection import train_test_split
 from torch import Tensor
@@ -72,6 +73,30 @@ class PopulationData:
             self.graph_nx.add_node(idx)
             for connection in row['Connections']:
                 self.graph_nx.add_edge(idx, connection)
+        return self
+
+    def encode_node2vec(self,
+                        dimensions: int = 64,
+                        walk_length: int = 64,
+                        num_walks: int = 16,
+                        p: int = 1,
+                        q: int = 1,
+                        workers: int = 4,
+                        window: int = 8,
+                        min_count: int = 1,
+                        batch_words: int = 16) -> Self:
+        node2vec = Node2Vec(self.graph_nx,
+                            dimensions=dimensions,
+                            walk_length=walk_length,
+                            num_walks=num_walks,
+                            p=p,
+                            q=q,
+                            workers=workers)
+        model = node2vec.fit(window=window, min_count=min_count, batch_words=batch_words)
+        embeddings = {node: model.wv[node] for node in model.wv.index_to_key}
+        embeddings_df = pd.DataFrame(embeddings).T
+        embeddings_df.columns = [f'Node2Vec_{i}' for i in range(dimensions)]
+        self.data_df = self.data_df.join(embeddings_df)
         return self
 
     def encode_degree(self) -> Self:
@@ -388,8 +413,8 @@ class PopulationData:
                          features: list[str] = None,
                          train: Literal['Train', 'Test'] = None,
                          population: int = None) -> tuple[Tensor, Tensor]:
-        features_df, labels_df = self.get_data_numpy(features=features, train=train, population=population)
-        return torch.tensor(features_df, dtype=torch.float32), torch.tensor(labels_df, dtype=torch.float32)
+        features_np, labels_np = self.get_data_numpy(features=features, train=train, population=population)
+        return torch.tensor(features_np, dtype=torch.float32), torch.tensor(labels_np, dtype=torch.float32)
 
     def get_graph_nx(self,
                      features: list[str] = None,

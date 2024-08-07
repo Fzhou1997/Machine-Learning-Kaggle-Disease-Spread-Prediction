@@ -1,4 +1,5 @@
-from typing import Literal
+from os import PathLike
+from typing import Literal, Self
 
 import torch
 import torch.nn as nn
@@ -38,3 +39,12 @@ class MultiLayerPerceptron(nn.Module):
     def predict(self,
                 x: torch.Tensor) -> torch.Tensor:
         return torch.round(self.forward(x))
+
+    def save(self,
+             path: str | bytes | PathLike[str] | PathLike[bytes]) -> None:
+        torch.save(self.state_dict(), path)
+
+    def load(self,
+             path: str | bytes | PathLike[str] | PathLike[bytes]) -> Self:
+        self.load_state_dict(torch.load(path))
+        return self
