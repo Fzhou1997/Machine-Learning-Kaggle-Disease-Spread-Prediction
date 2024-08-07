@@ -363,7 +363,7 @@ class PopulationData:
     def get_data_dataframes(self,
                             features: list[str] = None,
                             train: Literal['Train', 'Test'] = None,
-                            population: str = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+                            population: str = None) -> tuple[pd.DataFrame, pd.Series]:
         out = self.data_df
         if population is not None:
             out = out[out["Population"] == population]
@@ -371,7 +371,7 @@ class PopulationData:
             out = out[out[train]]
         out = out.drop(columns=["Population", "Connections", "Train", "Test"])
         out_features = out.drop(columns=["Infected"])
-        out_labels = out[["Infected"]]
+        out_labels = out["Infected"]
         if features is not None:
             out_columns = [feature for feature in features if feature in out_features.columns]
             out_features = out_features[out_columns]

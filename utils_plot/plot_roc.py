@@ -5,8 +5,8 @@ from sklearn.metrics import roc_curve, roc_auc_score
 
 def plot_roc(probability: ndarray,
              actual: ndarray,
-             title: str = None,
-             figsize: tuple[float, float] = (12, 8)):
+             title: str = "Receiver Operating Characteristic",
+             figsize: tuple[float, float] = (8, 8)):
     false_positive_rate, true_positive_rate, _ = roc_curve(actual, probability)
     auc = roc_auc_score(actual, probability)
     plt.figure(figsize=figsize)
