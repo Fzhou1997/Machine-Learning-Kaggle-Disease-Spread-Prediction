@@ -16,7 +16,7 @@ class GraphTrainer:
             self.optimizer.zero_grad()
             data = data.to(self.device)
             out = self.model(data.x, data.edge_index)
-            loss = self.criterion(out[data.train_mask], data.y[data.train_mask])
+            loss = self.criterion(out[data.train_mask], data.y[data.train_mask].float())
             running_loss += loss.item()
             loss.backward()
             self.optimizer.step()
@@ -30,7 +30,7 @@ class GraphTrainer:
             for data in self.eval_loader:
                 data = data.to(self.device)
                 out = self.model(data.x, data.edge_index)
-                loss += self.criterion(out[data.val_mask], data.y[data.val_mask]).item()
+                loss += self.criterion(out[data.val_mask], data.y[data.val_mask].float()).item()
         loss /= len(self.eval_loader)
         return loss
 
@@ -83,7 +83,7 @@ class GraphTrainer:
                 out = self.model(data.x, data.edge_index)
                 out = out.squeeze()
                 test_mask = data.test_mask
-                loss = self.criterion(out[test_mask], data.y[test_mask]).item()
+                loss = self.criterion(out[test_mask], data.y[test_mask].float()).item()
                 total_loss += loss
                 num_batches += 1
         average_loss = total_loss / num_batches

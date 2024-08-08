@@ -14,8 +14,9 @@ class GraphRunner:
         graph_data = graph_data.to(device)
         with torch.no_grad():
             out = self.model(graph_data.x, graph_data.edge_index)
-        # Return class predictions (e.g., argmax for classification)
-        return torch.argmax(out, dim=1)
+        # Apply sigmoid to get probabilities and return class predictions
+        probabilities = torch.sigmoid(out).squeeze()
+        return (probabilities > 0.5).float()
 
     def predict_proba(self, graph_data: Data, device: Literal['cpu', 'cuda', 'mps'] = 'cpu') -> Tensor:
         self.model.to(device)
@@ -23,5 +24,5 @@ class GraphRunner:
         graph_data = graph_data.to(device)
         with torch.no_grad():
             out = self.model(graph_data.x, graph_data.edge_index)
-        # Return probabilities for the positive class (assuming binary classification)
-        return torch.softmax(out, dim=1)[:, 1]
+        # Apply sigmoid to get probabilities
+        return torch.sigmoid(out).squeeze()
