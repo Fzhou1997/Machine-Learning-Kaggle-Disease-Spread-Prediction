@@ -1,1 +1,2 @@
 from utils_training.Trainer import Trainer
+from utils_training.GraphTrainer import GraphTrainer

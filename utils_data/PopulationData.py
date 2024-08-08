@@ -66,6 +66,13 @@ class PopulationData:
     def encode_connection_lists(self) -> Self:
         self.data_df['Connections'] = self.data_df['Connections'].apply(ast.literal_eval)
         return self
+    
+    def encode_connection_int(self) -> Self:
+        all_nodes = set(self.data_df.index).union(*self.data_df['Connections'].apply(ast.literal_eval))
+        node_mapping = {node: idx for idx, node in enumerate(all_nodes)}
+        self.data_df.index = self.data_df.index.map(node_mapping)
+        self.data_df['Connections'] = self.data_df['Connections'].apply(lambda conn_list: [node_mapping[conn] for conn in ast.literal_eval(conn_list)])
+        return self
 
     def encode_graph_nx(self) -> Self:
         self.graph_nx = nx.Graph()
@@ -637,9 +644,39 @@ class PopulationData:
             nx.set_node_attributes(out, self.data_df[feature].to_dict(), name=feature)
         return out
 
-    def get_graph_torch(self,
-                        features: list[str] = None,
-                        population: int = None) -> Data:
-        graph_nx = self.get_graph_nx(features=features, population=population)
-        graph_torch = from_networkx(graph_nx)
-        return graph_torch
+    def get_graph_torch(self, features: list[str] = None) -> Data:
+        data = self.data_df.copy(deep=True)
+
+        edges = []
+        for idx, row in data.iterrows():
+            for connection in row['Connections']:
+                edges.append((idx, connection))
+        edges = torch.tensor(edges, dtype=torch.long).t().contiguous()
+
+        x = torch.tensor(data[features].values, dtype=torch.float)
+        y = torch.tensor(data['Infected'].values, dtype=torch.long)
+
+        num_nodes = data.shape[0]
+        indices = torch.randperm(num_nodes)
+
+        train_split = int(0.7 * num_nodes)
+        val_split = int(0.85 * num_nodes)
+
+        train_indices = indices[:train_split]
+        val_indices = indices[train_split:val_split]
+        test_indices = indices[val_split:]
+
+        train_mask = torch.zeros(num_nodes, dtype=torch.bool)
+        val_mask = torch.zeros(num_nodes, dtype=torch.bool)
+        test_mask = torch.zeros(num_nodes, dtype=torch.bool)
+
+        train_mask[train_indices] = True
+        val_mask[val_indices] = True
+        test_mask[test_indices] = True
+
+        graph = Data(x=x, edge_index=edges, y=y)
+        graph.train_mask = train_mask
+        graph.val_mask = val_mask
+        graph.test_mask = test_mask
+
+        return graph
