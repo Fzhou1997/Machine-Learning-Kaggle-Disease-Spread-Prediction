@@ -378,6 +378,216 @@ class PopulationData:
         self.data_df['Standardized_Mean_Neighbor_Clustering_Coefficient'] = scaler.fit_transform(self.data_df[['Mean_Neighbor_Clustering_Coefficient']])
         return self
 
+    def encode_sum_population_age(self) -> Self:
+        sum_population_age = self.data_df.groupby('Population')['Age'].sum()
+        self.data_df['Sum_Population_Age'] = self.data_df['Population'].map(sum_population_age)
+        return self
+
+    def encode_sum_population_constitution(self) -> Self:
+        sum_population_constitution = self.data_df.groupby('Population')['Constitution'].sum()
+        self.data_df['Sum_Population_Constitution'] = self.data_df['Population'].map(sum_population_constitution)
+        return self
+
+    def encode_sum_population_behavior(self) -> Self:
+        sum_population_behavior = self.data_df.groupby('Population')['Behaviour'].sum()
+        self.data_df['Sum_Population_Behaviour'] = self.data_df['Population'].map(sum_population_behavior)
+        return self
+
+    def encode_sum_population_degree(self) -> Self:
+        sum_population_degree = self.data_df.groupby('Population')['Degree'].sum()
+        self.data_df['Sum_Population_Degree'] = self.data_df['Population'].map(sum_population_degree)
+        return self
+
+    def encode_sum_population_degree_centrality(self) -> Self:
+        sum_population_degree_centrality = self.data_df.groupby('Population')['Degree_Centrality'].sum()
+        self.data_df['Sum_Population_Degree_Centrality'] = self.data_df['Population'].map(sum_population_degree_centrality)
+        return self
+
+    def encode_sum_population_clustering_coefficient(self) -> Self:
+        sum_population_clustering_coefficient = self.data_df.groupby('Population')['Clustering_Coefficient'].sum()
+        self.data_df['Sum_Population_Clustering_Coefficient'] = self.data_df['Population'].map(sum_population_clustering_coefficient)
+        return self
+
+    def encode_normalized_sum_population_age(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Sum_Population_Age'] = scaler.fit_transform(self.data_df[['Sum_Population_Age']])
+        return self
+
+    def encode_normalized_sum_population_constitution(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Sum_Population_Constitution'] = scaler.fit_transform(self.data_df[['Sum_Population_Constitution']])
+        return self
+
+    def encode_normalized_sum_population_behavior(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Sum_Population_Behaviour'] = scaler.fit_transform(self.data_df[['Sum_Population_Behaviour']])
+        return self
+
+    def encode_normalized_sum_population_degree(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Sum_Population_Degree'] = scaler.fit_transform(self.data_df[['Sum_Population_Degree']])
+        return self
+
+    def encode_normalized_sum_population_degree_centrality(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Sum_Population_Degree_Centrality'] = scaler.fit_transform(self.data_df[['Sum_Population_Degree_Centrality']])
+        return self
+
+    def encode_normalized_sum_population_clustering_coefficient(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Sum_Population_Clustering_Coefficient'] = scaler.fit_transform(self.data_df[['Sum_Population_Clustering_Coefficient']])
+        return self
+
+    def encode_standardized_sum_population_age(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Sum_Population_Age'] = scaler.fit_transform(self.data_df[['Sum_Population_Age']])
+        return self
+
+    def encode_standardized_sum_population_constitution(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Sum_Population_Constitution'] = scaler.fit_transform(self.data_df[['Sum_Population_Constitution']])
+        return self
+
+    def encode_standardized_sum_population_behavior(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Sum_Population_Behaviour'] = scaler.fit_transform(self.data_df[['Sum_Population_Behaviour']])
+        return self
+
+    def encode_standardized_sum_population_degree(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Sum_Population_Degree'] = scaler.fit_transform(self.data_df[['Sum_Population_Degree']])
+        return self
+
+    def encode_standardized_sum_population_degree_centrality(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Sum_Population_Degree_Centrality'] = scaler.fit_transform(self.data_df[['Sum_Population_Degree_Centrality']])
+        return self
+
+    def encode_standardized_sum_population_clustering_coefficient(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Sum_Population_Clustering_Coefficient'] = scaler.fit_transform(self.data_df[['Sum_Population_Clustering_Coefficient']])
+        return self
+
+    def encode_mean_population_age(self) -> Self:
+        mean_population_age = self.data_df.groupby('Population')['Age'].mean()
+        self.data_df['Mean_Population_Age'] = self.data_df['Population'].map(mean_population_age)
+        return self
+
+    def encode_mean_population_constitution(self) -> Self:
+        mean_population_constitution = self.data_df.groupby('Population')['Constitution'].mean()
+        self.data_df['Mean_Population_Constitution'] = self.data_df['Population'].map(mean_population_constitution)
+        return self
+
+    def encode_mean_population_behavior(self) -> Self:
+        mean_population_behavior = self.data_df.groupby('Population')['Behaviour'].mean()
+        self.data_df['Mean_Population_Behaviour'] = self.data_df['Population'].map(mean_population_behavior)
+        return self
+
+    def encode_mean_population_degree(self) -> Self:
+        mean_population_degree = self.data_df.groupby('Population')['Degree'].mean()
+        self.data_df['Mean_Population_Degree'] = self.data_df['Population'].map(mean_population_degree)
+        return self
+
+    def encode_mean_population_degree_centrality(self) -> Self:
+        mean_population_degree_centrality = self.data_df.groupby('Population')['Degree_Centrality'].mean()
+        self.data_df['Mean_Population_Degree_Centrality'] = self.data_df['Population'].map(mean_population_degree_centrality)
+        return self
+
+    def encode_mean_population_clustering_coefficient(self) -> Self:
+        mean_population_clustering_coefficient = self.data_df.groupby('Population')['Clustering_Coefficient'].mean()
+        self.data_df['Mean_Population_Clustering_Coefficient'] = self.data_df['Population'].map(mean_population_clustering_coefficient)
+        return self
+
+    def encode_normalized_mean_population_age(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Mean_Population_Age'] = scaler.fit_transform(self.data_df[['Mean_Population_Age']])
+        return self
+    
+    def encode_normalized_mean_population_constitution(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Mean_Population_Constitution'] = scaler.fit_transform(self.data_df[['Mean_Population_Constitution']])
+        return self
+    
+    def encode_normalized_mean_population_behavior(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Mean_Population_Behaviour'] = scaler.fit_transform(self.data_df[['Mean_Population_Behaviour']])
+        return self
+    
+    def encode_normalized_mean_population_degree(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Mean_Population_Degree'] = scaler.fit_transform(self.data_df[['Mean_Population_Degree']])
+        return self
+    
+    def encode_normalized_mean_population_degree_centrality(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Mean_Population_Degree_Centrality'] = scaler.fit_transform(self.data_df[['Mean_Population_Degree_Centrality']])
+        return self
+    
+    def encode_normalized_mean_population_clustering_coefficient(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Mean_Population_Clustering_Coefficient'] = scaler.fit_transform(self.data_df[['Mean_Population_Clustering_Coefficient']])
+        return self
+    
+    def encode_standardized_mean_population_age(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Mean_Population_Age'] = scaler.fit_transform(self.data_df[['Mean_Population_Age']])
+        return self
+    
+    def encode_standardized_mean_population_constitution(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Mean_Population_Constitution'] = scaler.fit_transform(self.data_df[['Mean_Population_Constitution']])
+        return self
+    
+    def encode_standardized_mean_population_behavior(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Mean_Population_Behaviour'] = scaler.fit_transform(self.data_df[['Mean_Population_Behaviour']])
+        return self
+    
+    def encode_standardized_mean_population_degree(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Mean_Population_Degree'] = scaler.fit_transform(self.data_df[['Mean_Population_Degree']])
+        return self
+    
+    def encode_standardized_mean_population_degree_centrality(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Mean_Population_Degree_Centrality'] = scaler.fit_transform(self.data_df[['Mean_Population_Degree_Centrality']])
+        return self
+    
+    def encode_standardized_mean_population_clustering_coefficient(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Mean_Population_Clustering_Coefficient'] = scaler.fit_transform(self.data_df[['Mean_Population_Clustering_Coefficient']])
+        return
+
+    def encode_sum_population_distance_to_index_patient(self) -> Self:
+        sum_population_distance_to_index_patient = self.data_df.groupby('Population')['Distance_to_Index_Patient'].sum()
+        self.data_df['Sum_Population_Distance_to_Index_Patient'] = self.data_df['Population'].map(sum_population_distance_to_index_patient)
+        return self
+
+    def encode_normalized_sum_population_distance_to_index_patient(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Sum_Population_Distance_to_Index_Patient'] = scaler.fit_transform(self.data_df[['Sum_Population_Distance_to_Index_Patient']])
+        return self
+
+    def encode_standardized_sum_population_distance_to_index_patient(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Sum_Population_Distance_to_Index_Patient'] = scaler.fit_transform(self.data_df[['Sum_Population_Distance_to_Index_Patient']])
+        return self
+
+    def encode_mean_population_distance_to_index_patient(self) -> Self:
+        mean_population_distance_to_index_patient = self.data_df.groupby('Population')['Distance_to_Index_Patient'].mean()
+        self.data_df['Mean_Population_Distance_to_Index_Patient'] = self.data_df['Population'].map(mean_population_distance_to_index_patient)
+        return self
+
+    def encode_normalized_mean_population_distance_to_index_patient(self) -> Self:
+        scaler = MinMaxScaler()
+        self.data_df['Normalized_Mean_Population_Distance_to_Index_Patient'] = scaler.fit_transform(self.data_df[['Mean_Population_Distance_to_Index_Patient']])
+        return self
+
+    def encode_standardized_mean_population_distance_to_index_patient(self) -> Self:
+        scaler = StandardScaler()
+        self.data_df['Standardized_Mean_Population_Distance_to_Index_Patient'] = scaler.fit_transform(self.data_df[['Mean_Population_Distance_to_Index_Patient']])
+        return self
+
     def encode_test_train(self) -> Self:
         indices = self.data_df.index
         train_idx, test_idx = train_test_split(indices, test_size=0.2)
@@ -433,15 +643,3 @@ class PopulationData:
         graph_nx = self.get_graph_nx(features=features, population=population)
         graph_torch = from_networkx(graph_nx)
         return graph_torch
-
-
-if __name__ == '__main__':
-    data = PopulationData().load_raw("../data/raw/train.csv")
-    data.encode_connection_lists()
-    data.encode_graph_nx()
-    data.encode_degree()
-    data.encode_degree_centrality()
-    data.encode_clustering_coefficient()
-    data.encode_connected_index_patient()
-    data.encode_distance_to_index_patient()
-    data.encode_test_train()
