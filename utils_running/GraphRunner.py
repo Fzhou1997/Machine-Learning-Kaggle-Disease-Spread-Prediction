@@ -8,18 +8,18 @@ class GraphRunner:
     def __init__(self, model: Module):
         self.model = model
 
-    def predict(self, graph: Data, device: Literal['cpu', 'cuda', 'mps'] = 'cpu') -> Tensor:
+    def predict(self, graph: Data, device: Literal['cpu', 'cuda', 'mps'] = 'cpu', threshold: float = 0.5) -> Tensor:
         self.model.to(device)
         self.model.eval()
         graph = graph.to(device)
         with torch.no_grad():
-            out = self.model(graph.x.to(device), graph.edge_index.to(device))
-        return (out > 0.5).float()
+            out = self.model(graph.x, graph.edge_index).squeeze()
+        return (out > threshold).float()
 
     def predict_proba(self, graph: Data, device: Literal['cpu', 'cuda', 'mps'] = 'cpu') -> Tensor:
         self.model.to(device)
         self.model.eval()
         graph = graph.to(device)
         with torch.no_grad():
-            out = self.model(graph.x.to(device), graph.edge_index.to(device))
-        return torch.sigmoid(out)
+            out = self.model(graph.x, graph.edge_index).squeeze()
+        return out
