@@ -1,6 +1,7 @@
-import torch.nn.functional as F
-from torch_geometric.nn import GCN, GCNConv
 import torch
+import torch.nn.functional as F
+from torch_geometric.nn import GCNConv
+
 
 class GraphConvolutionalNetwork(torch.nn.Module):
     def __init__(self, in_channels, hidden_layers, out_channels, dropout=0.5):
@@ -12,7 +13,7 @@ class GraphConvolutionalNetwork(torch.nn.Module):
                 self.layers.append(GCNConv(in_channels, hidden_layer))
             else:
                 self.layers.append(GCNConv(hidden_layers[i - 1], hidden_layer))
-        
+
         # Final output layer
         self.layers.append(GCNConv(hidden_layers[-1], out_channels))
         self.dropout = dropout
@@ -22,6 +23,6 @@ class GraphConvolutionalNetwork(torch.nn.Module):
             x = conv(x, edge_index)
             x = F.relu(x)
             x = F.dropout(x, p=self.dropout, training=self.training)
-        
+
         x = self.layers[-1](x, edge_index).squeeze()
         return torch.sigmoid(x)
