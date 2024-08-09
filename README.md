@@ -1,23 +1,18 @@
-# Predicting Disease Spread Using Generalized Discriminant Analysis with Kernel Functions (GDA-KF)
+# Shallow Learning Classification for Disease Spread Prediction in a Population Graph
 
 ## Overview
 
-This project aims to predict the spread of infectious diseases within a simulated population graph using Generalized Discriminant Analysis (GDA) combined with Kernel Functions.
-The proposed model leverages individual-level features such as age, constitution, and behavior to classify infection statuses efficiently and accurately.
-This study is conducted using the dataset from the Kaggle challenge "Simulated Disease Spread."
+This project focuses on predicting disease spread within a simulated population graph using various machine learning models. The study utilizes individual and graph-level features to classify infection statuses, aiming for a balance between accuracy and computational efficiency. The dataset used is sourced from the Kaggle challenge "Predict Simulated Disease Spread (Classification)."
 
 ## Abstract
 
-The spread of infectious diseases poses a significant threat to public health.
-Traditional epidemiological models often have limitations in capturing the complex dynamics of disease transmission.
-This research proposes the use of Generalized Discriminant Analysis (GDA), a shallow learning technique that combines traditional Gaussian Discriminant Analysis and Kernel Functions, to predict simulated disease spread within a population graph.
-The model incorporates individual features such as age, constitution, and behavior to classify infection status.
-By leveraging GDA's ability to identify complex patterns, we aim to develop a more accurate and efficient predictive model for disease spread.
-The results of this study could inform targeted interventions and control strategies, ultimately contributing to improved public health outcomes.
+Accurately predicting disease transmission is critical for public health interventions. This study evaluates shallow-learning techniques for predicting disease spread within a simulated population graph, focusing on computational efficiency and predictive performance. Through targeted feature engineering, shallow models achieved competitive accuracy compared to ensemble and deep-learning methods while offering significant reductions in computational time. The results demonstrate the effectiveness of shallow-learning approaches for epidemiological modeling, particularly in resource-constrained environments.
 
 ## Introduction
 
-Recent studies, such as Alali et al. (2022), have demonstrated the effectiveness of shallow learning methods, including algorithms such as Gaussian Process Regression (GPR), in complex tasks like disease spread prediction. These findings challenge the prevailing trend towards deep learning, which often necessitates vast computational resources and large datasets. By contrast, shallow learning methods, like Generalized Discriminant Analysis with Kernel Functions (GDA-KF), offer a computationally efficient alternative, making them particularly well-suited for scenarios with limited data or computational power. However, to our knowledge, none have specifically applied GDA-KF to graph-based disease spread prediction, incorporating individual-level features like age, constitution, and behavior. Therefore, we propose to leverage the unique strengths of GDA-KF, namely its ability to identify complex patterns and incorporate individual-level features, to develop a novel and potentially more accurate predictive model for disease spread that is also computationally efficient.
+Modeling infectious disease spread is a complex challenge for public health. Traditional models often fall short in capturing the nuances of transmission dynamics. Recent studies, like those by Alali et al., have demonstrated the effectiveness of shallow learning methods, offering a computationally efficient alternative to deep learning, especially in resource-constrained environments.
+
+This study explores the use of shallow-learning techniques for predicting disease spread within a population graph, incorporating features like age, constitution, and behavior. We compare the performance of shallow learning models with ensemble and deep-learning approaches to identify the most effective method for this task.
 
 
 ## Methods
@@ -27,46 +22,98 @@ The dataset for this study is sourced from the Kaggle challenge titled "Simulate
 
 ### Model
 
-To predict/classify infection status, we propose to use the Generalized Discriminant Analysis with Kernel Functions (GDA-KF). The choice of using GDA-KF is motivated by the underlying normal distribution of the simulated dataset. Traditional GDA is effective for normally distributed data, but the inclusion of kernel functions is necessary to capture any possible non-linear relationships between features and target, such as age.
+We implemented a variety of models to predict disease spread, focusing on the balance between computational efficiency and classification performance:
+
+- **Shallow Learning Models**
+  - **Quadratic Discriminant Analysis (QDA)**
+  - **Logistic Regression (LR)**
+  - **K-Nearest Neighbors (KNN)**
+
+- **Ensemble Models**
+  - **Extreme Gradient Boost (XGBoost)**
+  - **Random Forest (RF)**
+
+- **Deep Learning Models**
+  - **Multi-Layer Perceptron (MLP)**
+  - **Graph Neural Network (GNN)**
+  - **Graph Attention Network (GAT)**
 
 ### Training and Evaluation
 
-1. **Kernel Functions:** Experiment with different kernel functions and their parameters to identify the best-performing one.
-2. **Data Transformation:** Use the selected kernel to transform the data.
-3. **Discriminant Functions:** Apply GDA to learn the discriminant functions.
-4. **Hyperparameter Tuning:** Employ techniques such as Grid Search or Random Search combined with cross-validation to fine-tune the model’s hyperparameters.
-5. **Evaluation Metric:** The performance of the GDA-KF model will be evaluated using AUC-ROC, which measures the model’s ability to discriminate between classes.
-
-### Baseline Models
-
-To demonstrate the efficacy and efficiency of shallow learning, specifically the GDA-KF algorithm, in more complex prediction/classification tasks such as graph spread prediction, we will evaluate the model performance against other baseline shallow learning models:
-- Logistic Regression
-- Decision Trees
-- Support Vector Machines (SVM)
-
-Additionally, we will compare the GDA-KF model with a deep learning model:
-- Graph Neural Network (GNN)
+1. **Feature Engineering:** Engineered additional node-level and component-level features, including graph statistics, neighbor statistics, and distance to the index patient, to enhance model performance.
+2. **Model Training:** Implemented and trained a range of models, including shallow-learning, ensemble, and deep-learning approaches, using the engineered features.
+3. **Hyperparameter Tuning:** Employed Grid Search and Random Search with cross-validation to fine-tune the hyperparameters of each model.
+4. **Evaluation Metric:** Evaluated model performance using standard classification metrics, with a primary focus on AUC-ROC to assess the model’s ability to discriminate between classes.
 
 ## Expected Outcomes
 
-The expected outcome of this research is to develop a GDA-KF-based predictive model that is comparable with deep learning models in terms of accuracy for disease spread prediction. Additionally, the GDA-KF model aims to provide a robust tool for public health interventions by accurately predicting infection statuses based on individual features and the overall population graph, while also being computationally efficient.
+The study successfully demonstrated that shallow learning models, such as KNN, achieved competitive results compared to ensemble and deep learning models, particularly in terms of AUC-ROC scores. The inclusion of engineered features significantly improved performance across all models. Notably, shallow learning methods offered a clear advantage in computational efficiency while maintaining robust predictive capabilities for disease spread prediction. These findings highlight the effectiveness of shallow learning approaches in epidemiological modeling, providing a viable alternative to more computationally intensive deep learning models.
 
 ## Implementation
 
+The implementation of this project is organized into several key components:
 
+1. **Data Processing**:
+   - The `utils_data` module contains scripts for loading, preprocessing, and transforming the raw data.
+
+2. **Model Development**:
+   - Model definitions and training scripts are located in the `utils_classification` and `utils_training` modules.
+   - The `notebooks` directory contains Jupyter notebooks that document the development and fine-tuning of these models across different approaches: shallow learning, ensemble learning, and deep learning.
+
+3. **Training and Evaluation**:
+   - Models are trained using scripts in the `utils_training` module.
+   - Evaluation scripts are located in the `utils_evaluation` module, where standard metrics such as accuracy, precision, recall, F1 score, and AUC-ROC are computed to assess model performance.
+
+4. **Visualization**:
+   - The `utils_plot` module contains scripts for generating visualizations, including confusion matrices and ROC curves.
+
+5. **Running the Models**:
+   - The `utils_running` module includes scripts (`Runner.py` and `GraphRunner.py`). These scripts are for getting model predictions and probabilities.
+
+6. **Reproducibility**:
+   - All experiments and results are documented in the `notebooks` directory, allowing for easy replication of the study. The provided utilities ensure that all models can be trained and evaluated consistently across different configurations.
+
+
+## How to Run Code
+
+The notebooks are set up so that they can just be run with the necessary libraries installed. Run the following command to install the required libraries:
+```
+pip install -r requirements.txt
+```
+Following this, all notebooks can be run without further steps.
 
 ## Repository Structure
 ```
 .
 ├── data
-│ ├── test.csv
-│ └── train.csv
-├── models                      # Trained models and model evaluation scripts
-├── notebooks                   # Jupyter notebooks for data analysis and model development
+│   └── raw                     # Raw data files
+├── notebooks                   # Jupyter notebooks for data exploration and model 
+│   ├── _exploration            # Data exploration notebooks
+│   ├── deep_learning           # Notebooks for deep learning model development
+│   ├── ensemble_learning       # Notebooks for ensemble learning model development
+│   └── shallow_learning        # Notebooks for shallow learning model development
 ├── utils_classification        # Utility functions for classification tasks
-├── utils_data                  # Utility functions for data preprocessing and transformation
-├── utils_graph                 # Utility functions for graph-based tasks
+│   ├── GaussianDiscriminantAnalysis.py
+│   ├── GraphAttentionNetwork.py
+│   ├── GraphConvolutionalNetwork.py
+│   └── MultiLayerPerceptron.py
+├── utils_data                  # Utility functions for data preprocessing and 
+│   ├── PopulationData.py
+│   └── PopulationDataset.py
+├── utils_evaluation            # Utility functions for model evaluation
+│   ├── evaluate_graph.py
+│   ├── evaluate_numpy.py
+│   └── evaluate_tensor.py
 ├── utils_plot                  # Utility functions for plotting and visualization
-└── README.md                   # Project description and instructions
+│   ├── plot_confusion_matrix.py
+│   ├── plot_graph_nx.py
+│   └── plot_roc.py
+├── utils_running               # Utility functions for running the models
+│   ├── GraphRunner.py
+│   └── Runner.py
+└── utils_training              # Utility functions for training the models
+    ├── GraphTrainer.py
+    └── Trainer.py
+└── README.md
 ```
 

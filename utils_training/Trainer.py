@@ -8,10 +8,32 @@ from tqdm import tqdm
 
 
 class Trainer:
+    """
+    A class to train and evaluate a PyTorch model on dataset features.
+
+    Attributes:
+        model (Module): The PyTorch model to be trained.
+        criterion (Module): The loss function.
+        optimizer (Optimizer): The optimizer for training the model.
+        train_loader (DataLoader): DataLoader for the training dataset.
+        eval_loader (DataLoader): DataLoader for the evaluation dataset.
+        train_losses (list): List to store training losses for each epoch.
+        eval_losses (list): List to store evaluation losses for each epoch.
+        device (str): The device to run the model on.
+    """
+
     def __init__(self,
                  model: Module,
                  criterion: Module,
                  optimizer: Optimizer):
+        """
+        Initialize the Trainer with a model, criterion, and optimizer.
+
+        Args:
+            model (Module): The PyTorch model to be trained.
+            criterion (Module): The loss function.
+            optimizer (Optimizer): The optimizer for training the model.
+        """
         self.model = model
         self.criterion = criterion
         self.optimizer = optimizer
@@ -22,6 +44,12 @@ class Trainer:
         self.device = 'cpu'
 
     def _train_one_epoch(self) -> float:
+        """
+        Train the model for one epoch.
+
+        Returns:
+            float: The training loss for the epoch.
+        """
         running_loss = 0
         self.model.train()
         for features, label in self.train_loader:
@@ -37,6 +65,12 @@ class Trainer:
         return running_loss
 
     def _eval_one_epoch(self) -> float:
+        """
+        Evaluate the model for one epoch.
+
+        Returns:
+            float: The evaluation loss for the epoch.
+        """
         loss = 0
         self.model.eval()
         with torch.no_grad():
@@ -54,6 +88,16 @@ class Trainer:
               batch_size: int = 32,
               num_epochs: int = 100,
               device: Literal['cpu', 'cuda', 'mps'] = 'cpu') -> None:
+        """
+        Train the model on the given dataset.
+
+        Args:
+            train_set (Dataset): The dataset for training.
+            eval_set (Dataset): The dataset for evaluation.
+            batch_size (int, optional): The batch size for the DataLoader. Default is 32.
+            num_epochs (int, optional): The number of epochs to train. Default is 100.
+            device (Literal['cpu', 'cuda', 'mps'], optional): The device to run the model on. Default is 'cpu'.
+        """
         self.train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
         self.eval_loader = DataLoader(eval_set, batch_size=batch_size, shuffle=False)
         self.device = device
@@ -79,6 +123,14 @@ class Trainer:
              test_set: Dataset,
              batch_size: int = 32,
              device: Literal['cpu', 'cuda', 'mps'] = 'cpu') -> None:
+        """
+        Test the model on the given dataset.
+
+        Args:
+            test_set (Dataset): The dataset for testing.
+            batch_size (int, optional): The batch size for the DataLoader. Default is 32.
+            device (Literal['cpu', 'cuda', 'mps'], optional): The device to run the model on. Default is 'cpu'.
+        """
         self.device = device
         self.model.to(self.device)
         self.model.eval()
