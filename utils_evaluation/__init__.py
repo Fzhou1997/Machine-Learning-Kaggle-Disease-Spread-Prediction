@@ -1,2 +1,3 @@
 from utils_evaluation.evaluate_numpy import evaluate_numpy
 from utils_evaluation.evaluate_tensor import evaluate_tensor
+from utils_evaluation.evaluate_graph import evaluate_graph_metrics
