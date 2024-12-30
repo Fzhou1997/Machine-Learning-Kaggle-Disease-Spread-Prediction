@@ -40,7 +40,6 @@ class PopulationData:
             Self: The instance of the class with loaded data.
         """
         self.data_df = pd.read_csv(path, index_col='ID')
-        self.data_df.drop(columns=['id'], inplace=True)
         return self
 
     def load_processed(self, path: str | bytes | os.PathLike[str] | os.PathLike[bytes]) -> Self:
@@ -64,6 +63,23 @@ class PopulationData:
             path (str | bytes | os.PathLike[str] | os.PathLike[bytes]): Path to save the CSV file.
         """
         self.data_df.to_csv(path)
+
+    def save_predicted_probabilities(self,
+                                     path: str | bytes | os.PathLike[str] | os.PathLike[bytes],
+                                     probabilities: list[float] | pd.Series | np.ndarray[np.float_] | Tensor) -> None:
+        """
+        Saves the predicted probabilities to a CSV file.
+
+        Args:
+            path (str | bytes | os.PathLike[str] | os.PathLike[bytes]): Path to save the CSV file.
+            probabilities (list[float] | pd.Series | np.ndarray[np.float_] | Tensor): Predicted probabilities.
+        """
+        if not self.is_test():
+            raise ValueError("The data is not a test set.")
+        assert len(self.data_df) == len(probabilities), "The number of probabilities must match the number of samples."
+        out_probabilities = pd.Series(probabilities, name='Infected')
+        out_df = pd.DataFrame(out_probabilities, index=self.data_df['id'])
+        out_df.to_csv(path, index=True)
 
     def is_test(self) -> bool:
         """
@@ -1268,10 +1284,65 @@ class PopulationData:
         self.data_df['Eval'] = self.data_df.index.isin(test_idx)
         return self
 
-    def get_feature_dataframes(self,
-                               features: list[str] = None,
-                               train: Literal['Train', 'Eval'] = None,
-                               population: int = None) -> pd.DataFrame:
+    def get_id_dataframe(self,
+                         train: Literal['Train', 'Eval'] = None,
+                         population: str = None) -> pd.Series:
+        """
+        Retrieves the id data as a pandas Series.
+
+        Args:
+            train (Literal['Train', 'Eval'], optional): Whether to retrieve training or testing data. Defaults to None.
+            population (int, optional): Population to filter by. Defaults to None.
+
+        Returns:
+            pd.Series: The id data as a pandas Series.
+        """
+        out = self.data_df
+        if population is not None:
+            out = out[out["Population"] == population]
+        if not self.is_test() and train is not None:
+            out = out[out[train]]
+        out_ids = out["id"]
+        return out_ids
+
+    def get_id_numpy(self,
+                     train: Literal['Train', 'Eval'] = None,
+                     population: str = None) -> np.ndarray:
+        """
+        Retrieves the id data as a numpy array.
+
+        Args:
+            train (Literal['Train', 'Eval'], optional): Whether to retrieve training or testing data. Defaults to None.
+            population (int, optional): Population to filter by. Defaults to None.
+
+        Returns:
+            np.ndarray: The id data as a numpy array.
+        """
+        ids_df = self.get_id_dataframe(train=train, population=population)
+        ids_np = ids_df.to_numpy()
+        return ids_np
+
+    def get_id_tensor(self,
+                      train: Literal['Train', 'Eval'] = None,
+                      population: str = None) -> Tensor:
+        """
+        Retrieves the id data as a PyTorch tensor.
+
+        Args:
+            train (Literal['Train', 'Eval'], optional): Whether to retrieve training or testing data. Defaults to None.
+            population (int, optional): Population to filter by. Defaults to None.
+
+        Returns:
+            Tensor: The id data as a PyTorch tensor.
+        """
+        ids_np = self.get_id_numpy(train=train, population=population)
+        ids_ts = torch.tensor(ids_np, dtype=torch.float32)
+        return ids_ts
+
+    def get_feature_dataframe(self,
+                              features: list[str] = None,
+                              train: Literal['Train', 'Eval'] = None,
+                              population: str = None) -> pd.DataFrame:
         """
         Retrieves the features data as a pandas DataFrame.
 
@@ -1288,7 +1359,7 @@ class PopulationData:
             out = out[out["Population"] == population]
         if not self.is_test() and train is not None:
             out = out[out[train]]
-        out = out.drop(columns=["Population", "Connections", "Train", "Eval", "Infected"], axis=1, errors="ignore")
+        out = out.drop(columns=["id", "Population", "Connections", "Train", "Eval", "Infected"], axis=1, errors="ignore")
         out_features = out
         if features is not None:
             out_columns = [feature for feature in features if feature in out_features.columns]
@@ -1298,7 +1369,7 @@ class PopulationData:
     def get_feature_numpy(self,
                           features: list[str] = None,
                           train: Literal['Train', 'Eval'] = None,
-                          population: int = None) -> np.ndarray:
+                          population: str = None) -> np.ndarray:
         """
         Retrieves the features data as a numpy array.
 
@@ -1310,14 +1381,14 @@ class PopulationData:
         Returns:
             np.ndarray: The features data as a numpy array.
         """
-        features_df = self.get_feature_dataframes(features=features, train=train, population=population)
+        features_df = self.get_feature_dataframe(features=features, train=train, population=population)
         features_np = features_df.to_numpy()
         return features_np
 
-    def get_feature_tensors(self,
-                            features: list[str] = None,
-                            train: Literal['Train', 'Eval'] = None,
-                            population: int = None) -> Tensor:
+    def get_feature_tensor(self,
+                           features: list[str] = None,
+                           train: Literal['Train', 'Eval'] = None,
+                           population: str = None) -> Tensor:
         """
         Retrieves the features data as a PyTorch tensor.
 
@@ -1332,6 +1403,66 @@ class PopulationData:
         features_np = self.get_feature_numpy(features=features, train=train, population=population)
         features_ts = torch.tensor(features_np, dtype=torch.float32)
         return features_ts
+
+    def get_label_dataframe(self,
+                            train: Literal['Train', 'Eval'] = None,
+                            population: str = None) -> pd.Series:
+        """
+        Retrieves the labels data as a pandas Series.
+
+        Args:
+            train (Literal['Train', 'Eval'], optional): Whether to retrieve training or testing data. Defaults to None.
+            population (int, optional): Population to filter by. Defaults to None.
+
+        Returns:
+            pd.Series: The labels data as a pandas Series.
+
+        Raises:
+            ValueError: If the data is test data.
+        """
+        if self.is_test():
+            raise ValueError("Test data does not have labels.")
+        out = self.data_df
+        if population is not None:
+            out = out[out["Population"] == population]
+        if train is not None:
+            out = out[out[train]]
+        out_labels = out["Infected"]
+        return out_labels
+
+    def get_label_numpy(self,
+                        train: Literal['Train', 'Eval'] = None,
+                        population: str = None) -> np.ndarray:
+        """
+        Retrieves the labels data as a numpy array.
+
+        Args:
+            train (Literal['Train', 'Eval'], optional): Whether to retrieve training or testing data. Defaults to None.
+            population (int, optional): Population to filter by. Defaults to None.
+
+        Returns:
+            np.ndarray: The labels data as a numpy array.
+        """
+        labels_df = self.get_label_dataframe(train=train, population=population)
+        labels_np = labels_df.to_numpy()
+        return labels_np
+
+    def get_label_tensor(self,
+                         train: Literal['Train', 'Eval'] = None,
+                         population: str = None) -> Tensor:
+        """
+        Retrieves the labels data as a PyTorch tensor.
+
+        Args:
+            train (Literal['Train', 'Eval'], optional): Whether to retrieve training or testing data. Defaults to None.
+            population (int, optional): Population to filter by. Defaults to None.
+
+        Returns:
+            Tensor: The labels data as a PyTorch tensor.
+        """
+        labels_np = self.get_label_numpy(train=train, population=population)
+        labels_ts = torch.tensor(labels_np, dtype=torch.float32)
+        return labels_ts
 
     def get_feature_label_dataframes(self,
                                      features: list[str] = None,
@@ -1348,8 +1479,8 @@ class PopulationData:
         Returns:
             tuple[pd.DataFrame, pd.Series]: The features and labels as DataFrames.
         """
-        out_features = self.get_feature_dataframes(features=features, train=train, population=population)
-        out_labels = self.data_df["Infected"] if self.is_test() else None
+        out_features = self.get_feature_dataframe(features=features, train=train, population=population)
+        out_labels = self.get_label_dataframe(train=train, population=population) if not self.is_test() else None
         return out_features, out_labels
 
     def get_feature_label_numpy(self,
@@ -1369,13 +1500,13 @@ class PopulationData:
         """
         features_df, labels_df = self.get_feature_label_dataframes(features=features, train=train, population=population)
         features_np = features_df.to_numpy()
-        labels_np = labels_df.to_numpu() if labels_df is not None else None
+        labels_np = labels_df.to_numpy() if labels_df is not None else None
         return features_np, labels_np
 
     def get_feature_label_tensors(self,
                                   features: list[str] = None,
                                   train: Literal['Train', 'Eval'] = None,
-                                  population: int = None) -> tuple[Tensor, Tensor | None]:
+                                  population: str = None) -> tuple[Tensor, Tensor | None]:
         """
         Retrieves the data as PyTorch tensors.
 
@@ -1392,9 +1523,68 @@ class PopulationData:
         labels_ts = torch.tensor(labels_np, dtype=torch.float32) if labels_np is not None else None
         return features_ts, labels_ts
 
+    def get_id_feature_dataframes(self,
+                                  features: list[str] = None,
+                                  train: Literal['Train', 'Eval'] = None,
+                                  population: str = None) -> tuple[pd.Series, pd.DataFrame]:
+        """
+        Retrieves the data as pandas DataFrames.
+
+        Args:
+            features (list[str], optional): List of feature columns to include. Defaults to None.
+            train (Literal['Train', 'Eval'], optional): Whether to retrieve training or testing data. Defaults to None.
+            population (str, optional): Population to filter by. Defaults to None.
+
+        Returns:
+            tuple[pd.Series, pd.DataFrame]: The ids and features as DataFrames.
+        """
+        out_ids = self.get_id_dataframe(train=train, population=population)
+        out_features = self.get_feature_dataframe(features=features, train=train, population=population)
+        return out_ids, out_features
+
+    def get_id_feature_numpy(self,
+                             features: list[str] = None,
+                             train: Literal['Train', 'Eval'] = None,
+                             population: str = None) -> tuple[np.ndarray, np.ndarray]:
+        """
+        Retrieves the data as numpy arrays.
+
+        Args:
+            features (list[str], optional): List of feature columns to include. Defaults to None.
+            train (Literal['Train', 'Eval'], optional): Whether to retrieve training or testing data. Defaults to None.
+            population (str, optional): Population to filter by. Defaults to None.
+
+        Returns:
+            tuple[np.ndarray, np.ndarray]: The ids and features as numpy arrays.
+        """
+        ids_df, features_df = self.get_id_feature_dataframes(features=features, train=train, population=population)
+        ids_np = ids_df.to_numpy()
+        features_np = features_df.to_numpy()
+        return ids_np, features_np
+
+    def get_id_feature_tensors(self,
+                               features: list[str] = None,
+                               train: Literal['Train', 'Eval'] = None,
+                               population: str = None) -> tuple[Tensor, Tensor]:
+        """
+        Retrieves the data as PyTorch tensors.
+
+        Args:
+              features (list[str], optional): List of feature columns to include. Defaults to None.
+              train (Literal['Train', 'Eval'], optional): Whether to retrieve training or testing data. Defaults to None.
+              population (int, optional): Population to filter by. Defaults to None.
+
+        Returns:
+              tuple[Tensor, Tensor]: The ids and features as PyTorch tensors.
+        """
+        ids_np, features_np = self.get_id_feature_numpy(features=features, train=train, population=population)
+        ids_ts = torch.tensor(ids_np, dtype=torch.float32)
+        features_ts = torch.tensor(features_np, dtype=torch.float32)
+        return ids_ts, features_ts
+
     def get_graph_nx(self,
                      features: list[str] = None,
-                     population: int = None) -> nx.Graph:
+                     population: str = None) -> nx.Graph:
         """
         Retrieves the data as a NetworkX graph.
 
@@ -1408,7 +1598,11 @@ class PopulationData:
         out = self.graph_nx.copy()
         if population is not None:
             out.remove_nodes_from([node for node in out.nodes if self.data_df.loc[node, "Population"] != population])
-        out_features = [feature for feature in features if (feature in self.data_df.columns and feature not in ["Population", "Connections", "Train", "Eval"])]
+        if features is not None:
+            out_features = [feature for feature in features if (feature in self.data_df.columns and feature not in ["id", "Population", "Connections", "Train", "Eval"])]
+        else:
+            out_features = [feature for feature in self.data_df.columns if feature not in ["id", "Population", "Connections", "Train", "Eval"]]
+
         for feature in out_features:
             nx.set_node_attributes(out, self.data_df[feature].to_dict(), name=feature)
         return out
@@ -1431,7 +1625,12 @@ class PopulationData:
                 edges.append((idx, connection))
         edges = torch.tensor(edges, dtype=torch.long).t().contiguous()
 
-        x = torch.tensor(data[features].values, dtype=torch.float)
+        if features is not None:
+            out_features = [feature for feature in features if (feature in data.columns and feature not in ["id", "Population", "Connections", "Train", "Eval"])]
+        else:
+            out_features = [feature for feature in data.columns if feature not in ["id", "Population", "Connections", "Train", "Eval"]]
+
+        x = torch.tensor(data[out_features].values, dtype=torch.float)
         y = torch.tensor(data['Infected'].values, dtype=torch.long)
 
         num_nodes = data.shape[0]
