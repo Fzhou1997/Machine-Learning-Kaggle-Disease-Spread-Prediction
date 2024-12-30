@@ -1,7 +1,11 @@
-# Shallow Learning Classification for Disease Spread Prediction in a Population Graph
+<H1 align="middle"> Machine Learning for Disease Spread Prediction</H1>
+
+<br>
+<strong>Exploring various machine learning architectures for predicting the spread of infectious diseases in synthetic 
+population graphs</strong>
 
 ## Overview
-
+ 
 This project focuses on predicting disease spread within a simulated population graph using various machine learning models. The study utilizes individual and graph-level features to classify infection statuses, aiming for a balance between accuracy and computational efficiency. The dataset used is sourced from the Kaggle challenge "Predict Simulated Disease Spread (Classification)."
 
 ## Abstract
