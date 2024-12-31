@@ -7,7 +7,8 @@
     </strong>
 </p>
 
-## Description
+<br>
+<H2>Description</H2>
 
 This repository contains the code, data, and models for our CS6140 Machine Learning course and
 Kaggle [Predict Simulated Disease Spread (Classification)](https://www.kaggle.com/competitions/predict-simulated-disease-spread-classification/overview)
@@ -21,7 +22,8 @@ will be updated with additional code, data, and models as the research progresse
 project, including the methodology, results, and discussions, can be found in
 the [research report](https://docs.google.com/document/d/1bdr3bJpXvj3zNDenKJ3U3PD26dp_gV2A9J4GW41zoJI/edit?usp=sharing).
 
-## Motivation
+<br>
+<H2>Motivation</H2>
 
 Modeling infectious disease spread is a complex challenge for public health. Traditional models often fall short in
 capturing the nuances of transmission dynamics. Recent studies, like those by Alali et al., have demonstrated the
@@ -32,7 +34,8 @@ This study explores the use of various shallow, ensemble, and deep-learning tech
 within a population graph, incorporating features like age, constitution, and behavior. We compare the performance of
 shallow learning models with ensemble and deep-learning approaches to identify the most effective method for this task.
 
-## Key Features
+<br>
+<H2>Key Features</H2>
 
 - Implements a range of machine learning models, including shallow learning, ensemble learning, and deep learning
   architectures, for predicting disease spread in a population graph.
@@ -43,11 +46,12 @@ shallow learning models with ensemble and deep-learning approaches to identify t
 - Offers insights into the tradeoffs between computational efficiency and classification performance across different
   machine learning architectures and paradigms.
 
-## Implementation
+<br>
+<H2>Implementation</H2>
 
 This project is implemented in Python using Sci-kit Learn, XGBoost, and PyTorch machine learning libraries.
 
-### Dataset
+<H3>Dataset</H3>
 
 The dataset for this study is sourced from the Kaggle challenge
 titled [Predict Simulated Disease Spread (Classification)](https://www.kaggle.com/competitions/predict-simulated-disease-spread-classification/overview).
@@ -56,7 +60,7 @@ constitution, and behavior of individuals. The dataset is separated into trainin
 nodes. The training set includes the infection status of each node, while the inference set requires predicting the
 infection status based on the provided features.
 
-### Model Selection
+<H3>Model Selection</H3>
 
 We implemented a variety of models to predict disease spread, focusing on the balance between computational efficiency
 and classification performance:
@@ -75,7 +79,7 @@ and classification performance:
     - **Graph Neural Network (GNN)**
     - **Graph Attention Network (GAT)**
 
-### Results Summary
+<H3>Results Summary</H3>
 
 The following table summarizes the test-set metrics of the models on the Kaggle challenge dataset:
 
@@ -97,14 +101,15 @@ due to the complexity of the graph structure and the limited number of features.
 Highest performing models, namely MLP and XGBoost, outperform the Kaggle leaderboard models by over 20% in terms of
 accuracy and AUROC.
 
-### Future Directions
+<H3>Future Directions</H3>
 
 The study provides insights into the tradeoffs between computational efficiency and classification performance across
 different machine learning architectures and paradigms. Future research will focus on optimizing the hyperparameters of
 the models, exploring additional feature engineering techniques, and incorporating other features to improve
 classification performance.
 
-## Repository Structure
+<br>
+<H2>Repository Structure</H2>
 
 ```
 .
@@ -143,7 +148,8 @@ classification performance.
 └── README.md
 ```
 
-## Installation
+<br>
+<H2>Installation</H2>
 
 To run the code in this repository, you will need to have Python 3.10 or 3.11 installed on your system. You will also
 need to install the required Python packages listed in the `requirements.txt` file. You can install these packages using
@@ -153,7 +159,8 @@ the following command:
 pip install -r requirements.txt
 ```
 
-## Usage
+<br>
+<H2>Usage</H2>
 
 All driver code for training, evaluating, and testing the models is provided in the Jupyter notebooks located in the
 `notebooks/` directory. You can run these notebooks using JupyterLab or Jupyter Notebook.
