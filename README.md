@@ -2,7 +2,7 @@
 
 <p align="middle">
     <strong>
-        Exploring machine learning architectures for predicting the spread of infectious diseases in synthetic 
+        Exploring machine learning architectures for predicting the spread of diseases in synthetic 
         population graphs
     </strong>
 </p>
