@@ -1,95 +1,116 @@
 <H1 align="middle"> Machine Learning for Disease Spread Prediction</H1>
 
-<br>
-<strong>Exploring various machine learning architectures for predicting the spread of infectious diseases in synthetic 
-population graphs</strong>
+<p align="middle">
+    <strong>
+        Exploring machine learning architectures for predicting the spread of infectious diseases in synthetic 
+        population graphs
+    </strong>
+</p>
 
-## Overview
- 
-This project focuses on predicting disease spread within a simulated population graph using various machine learning models. The study utilizes individual and graph-level features to classify infection statuses, aiming for a balance between accuracy and computational efficiency. The dataset used is sourced from the Kaggle challenge "Predict Simulated Disease Spread (Classification)."
+## Description
 
-## Abstract
+This repository contains the code, data, and models for our CS6140 Machine Learning course and
+Kaggle [Predict Simulated Disease Spread (Classification)](https://www.kaggle.com/competitions/predict-simulated-disease-spread-classification/overview)
+challenge project, which explores predicting disease spread within a simulated population graph using various machine
+learning models. The study utilizes individual, adjacency, and graph-level features to classify infection statuses,
+aiming for a balance between accuracy and computational efficiency.
 
-Accurately predicting disease transmission is critical for public health interventions. This study evaluates shallow-learning techniques for predicting disease spread within a simulated population graph, focusing on computational efficiency and predictive performance. Through targeted feature engineering, shallow models achieved competitive accuracy compared to ensemble and deep-learning methods while offering significant reductions in computational time. The results demonstrate the effectiveness of shallow-learning approaches for epidemiological modeling, particularly in resource-constrained environments.
+This project was jointly developed by [Zhou Fang](https://github.com/Fzhou1997)
+and [Ryan Quinn](https://github.com/ryqui) at Northeastern University. This is an ongoing project, and the repository
+will be updated with additional code, data, and models as the research progresses. Additional information about the
+project, including the methodology, results, and discussions, can be found in
+the [research report](https://docs.google.com/document/d/1bdr3bJpXvj3zNDenKJ3U3PD26dp_gV2A9J4GW41zoJI/edit?usp=sharing).
 
-## Introduction
+## Motivation
 
-Modeling infectious disease spread is a complex challenge for public health. Traditional models often fall short in capturing the nuances of transmission dynamics. Recent studies, like those by Alali et al., have demonstrated the effectiveness of shallow learning methods, offering a computationally efficient alternative to deep learning, especially in resource-constrained environments.
+Modeling infectious disease spread is a complex challenge for public health. Traditional models often fall short in
+capturing the nuances of transmission dynamics. Recent studies, like those by Alali et al., have demonstrated the
+effectiveness of shallow learning methods, offering a computationally efficient alternative to deep learning, especially
+in resource-constrained environments.
 
-This study explores the use of shallow-learning techniques for predicting disease spread within a population graph, incorporating features like age, constitution, and behavior. We compare the performance of shallow learning models with ensemble and deep-learning approaches to identify the most effective method for this task.
+This study explores the use of various shallow, ensemble, and deep-learning techniques for predicting disease spread
+within a population graph, incorporating features like age, constitution, and behavior. We compare the performance of
+shallow learning models with ensemble and deep-learning approaches to identify the most effective method for this task.
 
+## Key Features
 
-## Methods
-### Dataset
-
-The dataset for this study is sourced from the Kaggle challenge titled "Simulated Disease Spread EDA." This dataset comprises simulated data of disease spread within a population graph, including features such as age, constitution, and behavior of individuals. The dataset is pre-cleaned and preprocessed.
-
-### Model
-
-We implemented a variety of models to predict disease spread, focusing on the balance between computational efficiency and classification performance:
-
-- **Shallow Learning Models**
-  - **Quadratic Discriminant Analysis (QDA)**
-  - **Logistic Regression (LR)**
-  - **K-Nearest Neighbors (KNN)**
-
-- **Ensemble Models**
-  - **Extreme Gradient Boost (XGBoost)**
-  - **Random Forest (RF)**
-
-- **Deep Learning Models**
-  - **Multi-Layer Perceptron (MLP)**
-  - **Graph Neural Network (GNN)**
-  - **Graph Attention Network (GAT)**
-
-### Training and Evaluation
-
-1. **Feature Engineering:** Engineered additional node-level and component-level features, including graph statistics, neighbor statistics, and distance to the index patient, to enhance model performance.
-2. **Model Training:** Implemented and trained a range of models, including shallow-learning, ensemble, and deep-learning approaches, using the engineered features.
-3. **Hyperparameter Tuning:** Employed Grid Search and Random Search with cross-validation to fine-tune the hyperparameters of each model.
-4. **Evaluation Metric:** Evaluated model performance using standard classification metrics, with a primary focus on AUC-ROC to assess the model’s ability to discriminate between classes.
-
-## Expected Outcomes
-
-The study successfully demonstrated that shallow learning models, such as KNN, achieved competitive results compared to ensemble and deep learning models, particularly in terms of AUC-ROC scores. The inclusion of engineered features significantly improved performance across all models. Notably, shallow learning methods offered a clear advantage in computational efficiency while maintaining robust predictive capabilities for disease spread prediction. These findings highlight the effectiveness of shallow learning approaches in epidemiological modeling, providing a viable alternative to more computationally intensive deep learning models.
+- Implements a range of machine learning models, including shallow learning, ensemble learning, and deep learning
+  architectures, for predicting disease spread in a population graph.
+- Utilizes a synthetic dataset from the Kaggle challenge "Simulated Disease Spread EDA," comprising individual and
+  graph-level features, of over 650,000 nodes for training and inference, respectively.
+- Incorporates engineered features, including graph statistics, neighbor statistics, and distance to the index patient,
+  to enhance model performance.
+- Offers insights into the tradeoffs between computational efficiency and classification performance across different
+  machine learning architectures and paradigms.
 
 ## Implementation
 
-The implementation of this project is organized into several key components:
+This project is implemented in Python using Sci-kit Learn, XGBoost, and PyTorch machine learning libraries.
 
-1. **Data Processing**:
-   - The `utils_data` module contains scripts for loading, preprocessing, and transforming the raw data.
+### Dataset
 
-2. **Model Development**:
-   - Model definitions and training scripts are located in the `utils_classification` and `utils_training` modules.
-   - The `notebooks` directory contains Jupyter notebooks that document the development and fine-tuning of these models across different approaches: shallow learning, ensemble learning, and deep learning.
+The dataset for this study is sourced from the Kaggle challenge
+titled [Predict Simulated Disease Spread (Classification)](https://www.kaggle.com/competitions/predict-simulated-disease-spread-classification/overview).
+This dataset comprises simulated data of disease spread within a population graph, including features such as age,
+constitution, and behavior of individuals. The dataset is separated into training and inference sets, each with 650,000
+nodes. The training set includes the infection status of each node, while the inference set requires predicting the
+infection status based on the provided features.
 
-3. **Training and Evaluation**:
-   - Models are trained using scripts in the `utils_training` module.
-   - Evaluation scripts are located in the `utils_evaluation` module, where standard metrics such as accuracy, precision, recall, F1 score, and AUC-ROC are computed to assess model performance.
+### Model Selection
 
-4. **Visualization**:
-   - The `utils_plot` module contains scripts for generating visualizations, including confusion matrices and ROC curves.
+We implemented a variety of models to predict disease spread, focusing on the balance between computational efficiency
+and classification performance:
 
-5. **Running the Models**:
-   - The `utils_running` module includes scripts (`Runner.py` and `GraphRunner.py`). These scripts are for getting model predictions and probabilities.
+- **Shallow Learning Models**
+    - **Quadratic Discriminant Analysis (QDA)**
+    - **Logistic Regression (LR)**
+    - **K-Nearest Neighbors (KNN)**
 
-6. **Reproducibility**:
-   - All experiments and results are documented in the `notebooks` directory, allowing for easy replication of the study. The provided utilities ensure that all models can be trained and evaluated consistently across different configurations.
+- **Ensemble Models**
+    - **Extreme Gradient Boost (XGBoost)**
+    - **Random Forest (RF)**
 
+- **Deep Learning Models**
+    - **Multi-Layer Perceptron (MLP)**
+    - **Graph Neural Network (GNN)**
+    - **Graph Attention Network (GAT)**
 
-## How to Run Code
+### Results Summary
 
-The notebooks are set up so that they can just be run with the necessary libraries installed. Run the following command to install the required libraries:
-```
-pip install -r requirements.txt
-```
-Following this, all notebooks can be run without further steps.
+The following table summarizes the test-set metrics of the models on the Kaggle challenge dataset:
+
+| Model                   | Accuracy | AUROC | F1-Score |
+|-------------------------|----------|-------|----------|
+| Quadratic Discriminant  | 0.65     | 0.71  | 0.62     |
+| Logistic Regression     | 0.60     | 0.63  | 0.54     |
+| K-Nearest Neighbors     | 0.75     | 0.83  | 0.76     |
+| Extreme Gradient Boost  | 0.80     | 0.87  | 0.81     |
+| Random Forest           | 0.67     | 0.76  | 0.58     |
+| Multi-Layer Perceptron  | 0.80     | 0.87  | 0.81     |
+| Graph Neural Network    | 0.58     | 0.60  | 0.47     |
+| Graph Attention Network | 0.56     | 0.59  | 0.33     |
+
+The results indicate that the Multi-Layer Perceptron and Extreme Gradient Boost models outperform other models in terms
+of accuracy, AUROC, and F1-Score. The Graph Neural Network and Graph Attention Network models exhibit lower performance
+due to the complexity of the graph structure and the limited number of features.
+
+Highest performing models, namely MLP and XGBoost, outperform the Kaggle leaderboard models by over 20% in terms of
+accuracy and AUROC.
+
+### Future Directions
+
+The study provides insights into the tradeoffs between computational efficiency and classification performance across
+different machine learning architectures and paradigms. Future research will focus on optimizing the hyperparameters of
+the models, exploring additional feature engineering techniques, and incorporating other features to improve
+classification performance.
 
 ## Repository Structure
+
 ```
 .
 ├── data
+|   ├── out                     # Predicted probability output files
+│   ├── processed               # Preprocessed data files
 │   └── raw                     # Raw data files
 ├── notebooks                   # Jupyter notebooks for data exploration and model 
 │   ├── _exploration            # Data exploration notebooks
@@ -116,8 +137,23 @@ Following this, all notebooks can be run without further steps.
 │   ├── GraphRunner.py
 │   └── Runner.py
 └── utils_training              # Utility functions for training the models
-    ├── GraphTrainer.py
-    └── Trainer.py
+│   ├── GraphTrainer.py
+│   └── Trainer.py
+├── requirements.txt            # Python package dependencies
 └── README.md
 ```
 
+## Installation
+
+To run the code in this repository, you will need to have Python 3.10 or 3.11 installed on your system. You will also
+need to install the required Python packages listed in the `requirements.txt` file. You can install these packages using
+the following command:
+
+``` bash
+pip install -r requirements.txt
+```
+
+## Usage
+
+All driver code for training, evaluating, and testing the models is provided in the Jupyter notebooks located in the
+`notebooks/` directory. You can run these notebooks using JupyterLab or Jupyter Notebook.
