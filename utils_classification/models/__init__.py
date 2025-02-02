@@ -1,1 +1,4 @@
 from .ModelMultiLayerPerceptron import ModelMultiLayerPerceptron
+from .RunnerMultiLayerPerceptron import RunnerMultiLayerPerceptron
+from .TesterMultiLayerPerceptron import TesterMultiLayerPerceptron
+from .TrainerMultiLayerPerceptron import TrainerMultiLayerPerceptron
